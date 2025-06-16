@@ -3,9 +3,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-import os, datetime, time
-from datetime import datetime as dt
-from github import Github
 from my_library import repos_df, users_df
 
 st.set_page_config(
@@ -195,26 +192,3 @@ if metric_choice:
         )
 else:
     st.warning("Por favor selecciona al menos una métrica para visualizar")
-
-# 5. License comparison
-st.subheader("Distribución por Licencia")
-license_metric = st.selectbox(
-    "Métrica para análisis de licencias:",
-    options=['forks', 'pull_requests', 'stargazers_count', 'watchers_count']
-)
-
-if license_metric:
-    license_fig = px.box(
-        clean_df,
-        x='license',
-        y=license_metric,
-        color='license',
-        points="all",
-        hover_data=['name']
-    )
-    license_fig.update_layout(
-        xaxis_title="Tipo de Licencia",
-        yaxis_title=license_metric.replace('_', ' ').title(),
-        showlegend=False
-    )
-    st.plotly_chart(license_fig, use_container_width=True)
