@@ -1,12 +1,7 @@
 import pandas as pd
 import streamlit as st
-parse_to_list = lambda x: x.split('//') if isinstance(x, str) else x
-extract_unique = lambda series: pd.Series([item for sublist in series\
-                if isinstance(sublist, list) for item in sublist]).unique()
-filter = lambda options: lambda series: all(f in series for f in options) \
-    if isinstance(series, list) else False
-
-
+import datetime as dt
+from datetime import datetime
 
 repo_data = pd.read_csv('repo_data2.csv', sep = ';')
 
@@ -24,3 +19,17 @@ repo_data = repo_data.rename(columns={
 })
 
 repo_data = repo_data.map(lambda x: 'None' if x == None or pd.isna(x) else x)
+
+parse_to_list = lambda x: x.split('//') if isinstance(x, str) else x
+
+extract_unique = lambda series: pd.Series([item for sublist in series\
+                if isinstance(sublist, list) for item in sublist]).unique()
+filter = lambda options: lambda series: all(f in series for f in options) \
+    if isinstance(series, list) else False
+
+parse_date = lambda string: datetime.strptime(string[:10], '%Y-%m-%d').date().strftime('%B %d, %Y')
+
+all_prog_langs = extract_unique(repo_data['Programming Languages used'].map(parse_to_list))
+
+count_langs = lambda column: {key: len(repo_data[repo_data[column].str.contains(key, na = False)]) \
+                    for key in all_prog_langs}
