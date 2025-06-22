@@ -28,8 +28,3 @@ filter = lambda options: lambda series: all(f in series for f in options) \
     if isinstance(series, list) else False
 
 parse_date = lambda string: datetime.strptime(string[:10], '%Y-%m-%d').date().strftime('%B %d, %Y')
-
-all_prog_langs = extract_unique(repo_data['Programming Languages used'].map(parse_to_list))
-
-count_langs = lambda column: {key: len(repo_data[repo_data[column].str.contains(key, na = False)]) \
-                    for key in all_prog_langs}

@@ -181,6 +181,7 @@ for index, row in repo_data.iterrows():
     repo_data.at[index, 'Languages Available'] = \
         '//'.join([lang.capitalize() for lang in repo_data.at[index, 'Languages Available'].split('//') \
                     if lang.lower() != 'sql' and lang.lower() != 'fish'])
+
     if 'linux' in row['Platforms'].lower() or 'debian' in row['Platforms'].lower() or\
     'fedora' in row['Platforms'].lower()\
         and not('//Linux' in row['Platforms'] or 'Linux//' in row['Platforms']):

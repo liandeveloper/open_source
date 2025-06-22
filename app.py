@@ -11,9 +11,10 @@ st.set_page_config(
     page_icon="📊"
 )
 
-st.title("🚀 GitHub Analytics Dashboard")
-st.markdown("""
-This website provides a thorough analysis of the most popular open-source Github repositories
+st.title("🚀 Repo Radar")
+st.text("""
+This website provides a thorough analysis of the most popular open-source Github repositories.
+Skip the search and start buliding with Repo Radar!!!
 """)
 
 ss = st.session_state
@@ -24,7 +25,12 @@ usage_data.iloc[:, 1:-3] = usage_data.iloc[:, 1:-3].map(parse_to_list)
 
 usage_data['Main Programming Language'] = usage_data['Main Programming Language'].map(lambda x: x[0] if isinstance(x, list) else x)
 
-tabs = st.tabs(['Find your repo', 'Data Analysis', 'Raw Data'])
+all_prog_langs = extract_unique(repo_data['Programming Languages used'].map(parse_to_list))
+
+count_langs = lambda column: {key: len(repo_data[repo_data[column].str.contains(key, na = False)]) \
+                    for key in all_prog_langs}
+
+tabs = st.tabs(['Find your repo', 'Data Analysis', "What's next?"])
 
 with tabs[0]:
     st.header('What repo are you looking for?')
@@ -115,28 +121,68 @@ with tabs[0]:
             
             st.subheader(f"URL link: {current_repo('url')}") 
         else:
-            st.subheader("Select a Repo to view it's data")
-            st.text('You can select a repo by clicking on the checkbox in the first column')
+            st.warning("Select a Repo to view it's data")
+            st.text('You can select a repo by clicking on the checkbox in the first column of the DataFrame')
 
 with tabs[1]:
-    st.header("📚 Programming Languages Distribution")
+    st.header("💻 GitHub Analytics Dashboard")
+    st.subheader("📚 Programming Languages Distribution")
+
+    # Setting up the dataframes:
 
     language_count = count_langs('Programming Languages used')
     as_main_language = count_langs('Main Programming Language')
 
+    
+    sort_criteria = st.selectbox('Sort by:',
+                    options=['Times Used', 'Times Used as Main Language' ],
+                    )
+    sort_criteria = 'As Main' if sort_criteria == 'Times Used as Main Language' else sort_criteria
     language_count = pd.DataFrame(
                     {'Language':  list(language_count.keys()),
                      'Times Used': list(language_count.values()),
                      'Used %': [num/len(repo_data) for num in language_count.values()],
                      'As Main': list(as_main_language.values()),
                      'As Main %': [num/len(repo_data) for num in as_main_language.values()]
-                     }).sort_values('Times Used', ascending=False,)
+                     }).sort_values(sort_criteria, ascending=False,)
 
-    filtered_lang_count = language_count
-    min_repos = 0
-    max_repos = len(repo_data)
+    license_stats = pd.merge(
+        pd.DataFrame(repo_data['license'].value_counts()),
+        pd.DataFrame(repo_data['license'].value_counts(normalize=True)),
+        left_index=True, 
+        right_index=True
+    ).reset_index()
+    license_stats.columns = ['License', 'Count', 'Percent']
+
+    # Filters
+    with st.sidebar:
+        chosen_filter = st.selectbox('Choose the type of filter you want to apply:',
+            options = ['Absolute', 'Relative'],
+        )
+        st.subheader("⚙️ Filtros")
+        if chosen_filter == 'Absolute':
+            min_repos = st.slider(
+                "Mínimo de repositorios:",
+                min_value=1,
+                max_value=int(language_count['Times Used'].max()),
+                value=15
+            )
+            max_repos = st.slider(
+                "Maximo de repositorios:",
+                min_value=min_repos,
+                max_value=int(language_count['Times Used'].max()),
+                value=int(language_count['Times Used'].max())
+            )
+
+            filtered_lang_count = language_count[language_count['Times Used'] >= min_repos]
+            filtered_lang_count = filtered_lang_count[filtered_lang_count['Times Used'] <= max_repos]
+            
+            filtered_licenses = license_stats[license_stats['Count'] >= min_repos]
+            filtered_licenses = filtered_licenses[filtered_licenses['Count'] <= max_repos]
+        elif chosen_filter == 'Relative':
+            pass
     
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2, border=True)
 
     with col1:
         st.subheader("Frequency Table")
@@ -147,9 +193,9 @@ with tabs[1]:
         )
 
     with col2:
-        st.subheader("Top Lenguajes")
+        st.subheader("Top Languages")
         fig = px.bar(
-            filtered_lang_count.head(15),
+            filtered_lang_count.head(12),
             x='Language',
             y=['Times Used', 'As Main'],
             barmode = 'overlay',
@@ -159,28 +205,30 @@ with tabs[1]:
             hover_data={
                 'Used %': ':.2%', 'As Main %': ':.2%'}
         )
-        fig.update_traces(texttemplate='%{text:.2%}', textposition='outside')
+        fig.update_traces(
+            texttemplate='%{text:.2%}', 
+            textposition='outside',
+            showlegend = False
+            )
         st.plotly_chart(fig, use_container_width=True)
 
+    with st.expander("🀄 See More", expanded=False):
+        st.subheader('🌲 Tree Map Visualization')
+        fig_tree = px.treemap(
+                filtered_lang_count,
+                names='Language',
+                values=sort_criteria,
+                path = ['Language'],
+                # hover_data={'Percent': ':.2%'},
+            )
+        fig_tree.update_layout(
+            height = 400,
+            margin = dict(l=0,r=0,b=40,t=0)
+        )
+        st.plotly_chart(fig_tree, use_container_width=True)
     """ --------------------------------------------------------------------- """
 
-    st.header("📜 Software License Distribution")
-
-    license_stats = pd.merge(
-        pd.DataFrame(repo_data['license'].value_counts()),
-        pd.DataFrame(repo_data['license'].value_counts(normalize=True)),
-        left_index=True, 
-        right_index=True
-    ).reset_index()
-    license_stats.columns = ['License', 'Count', 'Percent']
-
-    show_unknown = st.checkbox("Mostrar licencias no especificadas", True)
-
-    filtered_licenses = license_stats[license_stats['Count'] >= min_repos]
-    filtered_licenses = filtered_licenses[filtered_licenses['Count'] <= max_repos]
-    
-    if not show_unknown:
-        filtered_licenses = filtered_licenses[~filtered_licenses['License'].str.contains('None', na=True)]
+    st.subheader("📜 Software License Distribution")
 
     fig = px.bar(
         filtered_licenses.sort_values('Count', ascending=True),
@@ -190,7 +238,7 @@ with tabs[1]:
         color='Count',
         text='Percent',
         color_continuous_scale='Teal',
-        labels={'Count': 'N° Repositorios'},
+        labels={'Count': 'Number of Repos'},
         hover_data={'Percent': ':.2%'}
     )
     fig.update_traces(
@@ -202,79 +250,109 @@ with tabs[1]:
         height=500
     )
     st.plotly_chart(fig, use_container_width=True)
-    filtered_licenses
-    with st.expander("📋 See More", expanded=False):
-        col1, col2 = st.columns(2)
+    with st.expander("🧩 See More", expanded=False):
+        col1, col2 = st.columns(2, border = True)
         with col1:
-            filtered_licenses
+            st.subheader('📋 Tabular Data')
             st.dataframe(
                 filtered_licenses.style.format({'Percent': '{:.2%}'}),
-                use_container_width=True
+                use_container_width=True,
+                height = 600
             )
         with col2:
-            fig_pie = px.pie(
+            st.subheader('🌳 Tree Map Visualization')
+            fig_tree = px.treemap(
                 filtered_licenses,
                 names='License',
                 values='Count',
-                hole=0.3,
-                hover_data=['Percent']
+                path = ['License'],
+                hover_data={'Percent': ':.2%'},
             )
-            fig_pie.update_traces(
-                textinfo='percent+label',
-                pull=[0.1 if i == 0 else 0 for i in range(len(filtered_licenses))]
+            fig_tree.update_layout(
+                height = 600,
+                margin = dict(l=0,r=0,b=40,t=0)
             )
-            st.plotly_chart(fig_pie, use_container_width=True)
+            st.plotly_chart(fig_tree, use_container_width=True)
         
 
     """ ----------------------------------------------------------------------- """
 
-    st.header("🔧 Análisis Agrupado de Lenguajes y Licencias")
+    st.subheader("🔧 Repo Stats According to License and Language")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        lang_threshold = st.slider("Umbral mínimo para lenguajes", 1, 50, 12)
-    with col2:
-        license_threshold = st.slider("Umbral mínimo para licencias", 1, 100, 40)
-
-    biggest_languages = language_count[language_count['Times Used'] >= lang_threshold]
-    biggest_licenses = license_stats[license_stats['Count'] >= license_threshold]
-
-    clean_df = repo_data.copy()
-    clean_df['Main Programming Language'] = clean_df['Main Programming Language'].apply(
-        lambda x: 'Other' if x not in biggest_languages['Language'].values else x
-    )
-    clean_df['license'] = clean_df['license'].apply(
-        lambda x: 'Other' if x not in biggest_licenses['License'].values else x
-    )
-
-    st.subheader("Comparación de Forks y Pull Requests por Lenguaje")
+    metrics_options = ['Forks', 'Pull Requests', 'Stars', 'Open Issues']    
 
     metric_choice = st.multiselect(
-        "Selecciona métricas a comparar:",
-        options=['forks', 'pull_requests', 'open_issues', 'stars'],
-        default=['forks', 'pull_requests']
+        "Select Stats to compare",
+        options=metrics_options,
+        default=metrics_options[:3],
     )
 
+    metric_choice = [metric.lower().replace(' ', '_') for metric in metric_choice]
+
+    measurement = st.selectbox('How do you want to group the data',
+                    options = ['Mean', 'Median', 'Total'])
+    
     if metric_choice:
-        fig = px.bar(
-            clean_df.sort_values('forks', ascending=False),
-            x='Main Programming Language',
-            y=metric_choice,
-            barmode='group',
-            color_discrete_sequence=px.colors.qualitative.Pastel,
-            labels={'value': 'Count', 'variable': 'Metric', 'Main Programming Language': 'Language'},
+        big_number = max(repo_data[metric].max() for metric in metric_choice)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            min_threshold = st.number_input(f"Minimum quantity of {', '.join(metric_choice)}", 1, big_number, 1, step=1000)
+        with col2:
+            max_threshold = st.number_input(f"Maximum quantity of {', '.join(metric_choice)}", 1, big_number, big_number//2, step=1000)
         
-        )
-        fig.update_layout(
-            xaxis_title="Lenguaje de Programación",
-            yaxis_title="Cantidad",
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        condition = ((repo_data[metric_choice] >= min_threshold) & (repo_data[metric_choice] <= max_threshold)).all(axis=1)
+        metrics_df = repo_data[['Main Programming Language', 'license'] + metric_choice]
+        metrics_df = metrics_df[condition]
+        if measurement == 'Mean':
+            lang_metrics = metrics_df.groupby(['Main Programming Language'], as_index=False)[metric_choice].mean()
+            license_metrics = metrics_df.groupby(['license'], as_index=False)[metric_choice].mean()
+        elif measurement == 'Median':
+            ang_metrics = metrics_df.groupby(['Main Programming Language'], as_index=False)[metric_choice].median()
+            license_metrics = metrics_df.groupby(['license'], as_index=False)[metric_choice].median()
+        else:
+            license_metrics = lang_metrics = metrics_df
+
+
+        col3, col4 = st.columns(2, border=True)
+        with col3:
+            st.subheader('By Main Language')
+            fig = px.bar(
+                lang_metrics.sort_values(metric_choice[0], ascending=False),
+                x='Main Programming Language',
+                y=metric_choice,
+                barmode='group',
+                color_discrete_sequence=px.colors.qualitative.Pastel,
+                labels={'value': 'Count', 'variable': 'Metric', 'Main Programming Language': 'Language'}
+            
+            )
+            fig.update_layout(
+                xaxis_title="Programming Language",
+                yaxis_title="Count",
+                hovermode="x unified"
+            )
+            st.plotly_chart(fig, use_container_width=True)
         
+        with col4:
+            st.subheader('By License')
+            fig = px.bar(
+                license_metrics.sort_values(metric_choice[0], ascending=False),
+                x='license',
+                y=metric_choice,
+                barmode='group',
+                color_discrete_sequence=px.colors.qualitative.Pastel,
+                labels={'value': 'Count', 'variable': 'Metric', 'Main Programming Language': 'Language'}
+                )
+            
+            fig.update_layout(
+                xaxis_title="License",
+                yaxis_title="Count",
+                hovermode="x unified"
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📊 Ver datos agregados"):
-            agg_df = clean_df.groupby('Main Programming Language')[metric_choice].sum().sort_values(metric_choice[0], ascending=False)
+            agg_df = metrics_df.groupby('Main Programming Language')[metric_choice].sum().sort_values(metric_choice[0], ascending=False)
             st.dataframe(
                 agg_df.style.background_gradient(cmap='Blues'),
                 use_container_width=True
@@ -283,44 +361,29 @@ with tabs[1]:
         st.warning("Por favor selecciona al menos una métrica para visualizar")
 
 with tabs[2]:
-    quant_1 = st.selectbox('1',
-        options = ['Stars','Forks', 'Issues', 'Pull Requests']
-        )
-    quant_2 = st.selectbox('2',
-        options = ['Stars','Forks', 'Issues', 'Pull Requests'])
-    quali_1 =st.selectbox('3',
-        options = ['License','Main Programming Language'])
-    qn1_p = 'open_issues' if quant_1 == 'Issues' else quant_1.replace(' ', '_').lower()
-    qn2_p = 'open_issues' if quant_2 == 'Issues' else quant_2.replace(' ', '_').lower()
-    ql1_p = 'license' if quali_1 == 'License' else quali_1
+    st.header('We are still not done!!!')
+    st.text('''
+    We will be upgrading this website soon.
+    Stay tuned for more updates.
+    ''')
 
-    st.plotly_chart(px.scatter(
-        repo_data, 
-        x=qn1_p, y=qn2_p,
-        labels = [quant_1, quant_2],
-        color = ql1_p
-        )
-        )
-    st.dataframe(repo_data)
+    # quant_1 = st.selectbox('1',
+    #     options = ['Stars','Forks', 'Issues', 'Pull Requests']
+    #     )
+    # quant_2 = st.selectbox('2',
+    #     options = ['Stars','Forks', 'Issues', 'Pull Requests'])
+    # quali_1 =st.selectbox('3',
+    #     options = ['License','Main Programming Language'])
+    # qn1_p = 'open_issues' if quant_1 == 'Issues' else quant_1.replace(' ', '_').lower()
+    # qn2_p = 'open_issues' if quant_2 == 'Issues' else quant_2.replace(' ', '_').lower()
+    # ql1_p = 'license' if quali_1 == 'License' else quali_1
 
-with st.sidebar:
-    chosen_filter = st.selectbox('Choose the type of filter you want to apply:',
-        options = ['Absolute', 'Percentage'],
-    )
-    st.subheader("⚙️ Filtros")
-    if chosen_filter == 'Absolute':
-        min_repos = st.slider(
-            "Mínimo de repositorios:",
-            min_value=1,
-            max_value=int(language_count['Times Used'].max()),
-            value=1
-        )
-        max_repos = st.slider(
-            "Maximo de repositorios:",
-            min_value=min_repos,
-            max_value=int(language_count['Times Used'].max()),
-            value=int(language_count['Times Used'].max())
-        )
+    # st.plotly_chart(px.scatter(
+    #     repo_data, 
+    #     x=qn1_p, y=qn2_p,
+    #     labels = [quant_1, quant_2],
+    #     color = ql1_p
+    #     )
+    #     )
+    # st.dataframe(repo_data)
 
-        filtered_lang_count = language_count[language_count['Times Used'] >= min_repos]
-        filtered_lang_count = filtered_lang_count[filtered_lang_count['Times Used'] <= max_repos]
