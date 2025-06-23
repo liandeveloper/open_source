@@ -137,14 +137,14 @@ with tabs[1]:
     sort_criteria = st.selectbox('Sort by:',
                     options=['Times Used', 'Times Used as Main Language' ],
                     )
-    sort_criteria = 'As Main' if sort_criteria == 'Times Used as Main Language' else sort_criteria
+    sort_parsed = 'As Main' if sort_criteria == 'Times Used as Main Language' else sort_criteria
     language_count = pd.DataFrame(
                     {'Language':  list(language_count.keys()),
                      'Times Used': list(language_count.values()),
                      'Used %': [num/len(repo_data) for num in language_count.values()],
                      'As Main': list(as_main_language.values()),
                      'As Main %': [num/len(repo_data) for num in as_main_language.values()]
-                     }).sort_values(sort_criteria, ascending=False,)
+                     }).sort_values(sort_parsed, ascending=False,)
 
     license_stats = pd.merge(
         pd.DataFrame(repo_data['License'].value_counts()),
@@ -156,10 +156,11 @@ with tabs[1]:
 
     # Filters
     with st.sidebar:
-        chosen_filter = st.selectbox('Choose the type of filter you want to apply:',
-            options = ['Absolute', 'Relative'],
-        )
-        st.subheader("⚙️ Filtros")
+        # chosen_filter = st.selectbox('Choose the type of filter you want to apply:',
+        #     options = ['Absolute', 'Relative'],
+        # )
+        chosen_filter = 'Absolute'
+        st.subheader("⚙️ Filters")
         if chosen_filter == 'Absolute':
             min_repos = st.slider(
                 "Minimum repositories",
@@ -202,6 +203,7 @@ with tabs[1]:
             color='Language',
             text= 'Used %',
             labels={'Conteo': 'N° de Repositorios', 'Porcentaje': '%'},
+            hover_name='Language',
             hover_data={
                 'Used %': ':.2%', 'As Main %': ':.2%'}
         )
@@ -214,13 +216,17 @@ with tabs[1]:
 
     with st.expander("🀄 See More", expanded=False):
         st.subheader('🌲 Tree Map Visualization')
+        st.text(f'Viewing and sorting by: {sort_criteria}')
         fig_tree = px.treemap(
                 filtered_lang_count,
                 names='Language',
-                values=sort_criteria,
-                path = ['Language'],
-                # hover_data={'Percent': ':.2%'},
-            )
+                values=sort_parsed,
+                path = ['Language', sort_parsed],
+                hover_name='Language',
+                hover_data={
+                    'Times Used': True, 'As Main': True,
+                    'Used %': ':.2%', 'As Main %': ':.2%'}
+        )
         fig_tree.update_layout(
             height = 400,
             margin = dict(l=0,r=0,b=40,t=0)
@@ -354,11 +360,11 @@ with tabs[1]:
             )
             st.plotly_chart(fig, use_container_width=True)
 
-        with st.expander("📊 Ver datos agregados"):
-            langs_agg = lang_metrics.groupby(['License','Main Programming Language'])[parsed_choices].sum().sort_values(parsed_choices[0], ascending=False)
+        with st.expander("📊 See aggregated data:"):
+            agg_df = metrics_df.groupby(['License','Main Programming Language'])[parsed_choices].sum().sort_values(parsed_choices[0], ascending=False)
             
             st.dataframe(
-                langs_agg.style.background_gradient(cmap='Blues'),
+                agg_df.style.background_gradient(cmap='Blues'),
                 use_container_width=True
             )
     else:

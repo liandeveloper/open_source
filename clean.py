@@ -161,7 +161,7 @@ for index, row in repo_data.iterrows():
                 if new_item[0] == 'Languages':
                     new_values['Programming Languages used'].append(new_item[1])
                 else:
-                    new_values[key].append(item)
+                    new_values[key].append(item.capitalize())
     
     # print(new_values)
 
