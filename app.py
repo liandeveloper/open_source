@@ -17,7 +17,9 @@ This website provides a thorough analysis of the most popular open-source Github
 Skip the search and start buliding with Repo Radar!!!
 Our data was last updated on May 2025.
 """)
-ss = st.session_state
+
+import streamlit as st
+
 repo_data = pd.read_csv('repo_data_clean.csv', sep=';')
 
 usage_data = repo_data.iloc[:, [1, -5, 18, 19, -8, -4, -6, -7, 3, -3, -2]]
@@ -105,7 +107,7 @@ with tabs[0]:
                     st.text(current_repo('stars'))
                     st.subheader('Forks:')
                     st.text(current_repo('forks'))
-                    st.subheader('Issues:')
+                    st.subheader('Ist.session_stateues:')
                     st.text(current_repo('open_issues'))
                     st.subheader('Created:')
                     st.text(parse_date(current_repo('created_at')))
@@ -158,39 +160,34 @@ with tabs[1]:
 
     # Filters
     with st.sidebar:
-        # chosen_filter = st.selectbox('Choose the type of filter you want to apply:',
-        #     options = ['Absolute', 'Relative'],
-        # )
-        chosen_filter = 'Absolute'
-        st.subheader("⚙️ Filters")
-        if chosen_filter == 'Absolute':
-            min_repos = st.slider(
-                "Minimum repositories",
-                min_value=1,
-                max_value=int(language_count['Times Used'].max()),
-                value=15
-            )
-            max_repos = st.slider(
-                "Maximum repositories",
-                min_value=min_repos,
-                max_value=int(language_count['Times Used'].max()),
-                value=int(language_count['Times Used'].max())
-            )
+        if 'max_repos' not in st.session_state:
+            st.session_state.max_repos = int(language_count['Times Used'].max())
 
-            filtered_lang_count = language_count[language_count['Times Used'] >= min_repos]
-            filtered_lang_count = filtered_lang_count[filtered_lang_count['Times Used'] <= max_repos]
-            
-            filtered_licenses = license_stats[license_stats['Count'] >= min_repos]
-            filtered_licenses = filtered_licenses[filtered_licenses['Count'] <= max_repos]
-        elif chosen_filter == 'Relative':
-            pass
+        min_repos = st.slider(
+            "Minimum repositories",
+            min_value=1,
+            max_value=int(language_count['Times Used'].max()),
+            value=15
+        )
+        st.session_state.max_repos = st.slider(
+            "Maximum repositories",
+            min_value=min_repos,
+            max_value=int(language_count['Times Used'].max()),
+            value=st.session_state.max_repos
+        )
+
+        filtered_lang_count = language_count[language_count['Times Used'] >= min_repos]
+        filtered_lang_count = filtered_lang_count[filtered_lang_count['Times Used'] <= st.session_state.max_repos]
+        
+        filtered_licenses = license_stats[license_stats['Count'] >= min_repos]
+        filtered_licenses = filtered_licenses[filtered_licenses['Count'] <= st.session_state.max_repos]
     
     col1, col2 = st.columns(2, border=True)
 
     with col1:
         st.subheader("Frequency Table")
         st.dataframe(
-            language_count.style.format({'Used %': '{:.2%}', 'As Main %': '{:.2%}'}),
+            filtered_lang_count.style.format({'Used %': '{:.2%}', 'As Main %': '{:.2%}'}),
             use_container_width=True,
             hide_index= True,
         )
@@ -309,13 +306,19 @@ with tabs[1]:
     if metric_choice:
         big_number = max(repo_data[metric].max() for metric in parsed_options)
 
+        if not 'min_threshold' in st.session_state:
+            st.session_state.min_threshold = big_number//50
+        if not 'max_threshold' in st.session_state:
+            st.session_state.max_threshold = big_number
+        
+
         col1, col2 = st.columns(2)
         with col1:
-            min_threshold = st.number_input(f"Minimum quantity of {', '.join(parsed_choices)}", 1, big_number, big_number//50, step=1000)
+            st.session_state.min_threshold = st.number_input(f"Minimum quantity of {', '.join(metric_choice)}:", 1, big_number, st.session_state.min_threshold, step=1000)
         with col2:
-            max_threshold = st.number_input(f"Maximum quantity of {', '.join(parsed_choices)}", 1, big_number, big_number, step=1000)
+            st.session_state.max_threshold = st.number_input(f"Maximum quantity of {', '.join(metric_choice)}:", 1, big_number, st.session_state.max_threshold, step=1000)
         
-        condition = ((repo_data[parsed_choices] >= min_threshold) & (repo_data[parsed_choices] <= max_threshold)).all(axis=1)
+        condition = ((repo_data[parsed_choices] >= st.session_state.min_threshold) & (repo_data[parsed_choices] <= st.session_state.max_threshold)).all(axis=1)
         metrics_df = repo_data[['Main Programming Language', 'License'] + parsed_choices]
         metrics_df = metrics_df[condition]
         if measurement == 'Mean':
@@ -380,20 +383,26 @@ with tabs[1]:
 
 with tabs[2]:
     st.header('We are still not done!!!')
-    st.text('''
-    We will be upgrading this website soon.
-    Stay tuned for more updates.
+    st.markdown('''
+    We will be upgrading this website soon.\n
+    Stay tuned for more updates.\n
+    \n
+    📸 Follow us on instagram:\n
+    https://www.instagram.com/ds.open.source/
+    \n
+    👓 Keep in touch with our Github repository if you want to see how we code:\n
+    https://github.com/liandeveloper/open_source/
     ''')
 
     # quant_1 = st.selectbox('1',
-    #     options = ['Stars','Forks', 'Issues', 'Pull Requests']
+    #     options = ['Stars','Forks', 'Ist.session_stateues', 'Pull Requests']
     #     )
     # quant_2 = st.selectbox('2',
-    #     options = ['Stars','Forks', 'Issues', 'Pull Requests'])
+    #     options = ['Stars','Forks', 'Ist.session_stateues', 'Pull Requests'])
     # quali_1 =st.selectbox('3',
     #     options = ['License','Main Programming Language'])
-    # qn1_p = 'open_issues' if quant_1 == 'Issues' else quant_1.replace(' ', '_').lower()
-    # qn2_p = 'open_issues' if quant_2 == 'Issues' else quant_2.replace(' ', '_').lower()
+    # qn1_p = 'open_ist.session_stateues' if quant_1 == 'Ist.session_stateues' else quant_1.replace(' ', '_').lower()
+    # qn2_p = 'open_ist.session_stateues' if quant_2 == 'Ist.session_stateues' else quant_2.replace(' ', '_').lower()
     # ql1_p = 'License' if quali_1 == 'License' else quali_1
 
     # st.plotly_chart(px.scatter(

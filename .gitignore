@@ -1,3 +1,4 @@
 trash/
 __pycache__/
 repo_data2.csv
+.gitignore
