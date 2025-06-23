@@ -7,6 +7,7 @@ repo_data = pd.read_csv('repo_data2.csv', sep = ';')
 
 repo_data = repo_data.rename(columns={
     'name': 'Name',
+    'license': 'License',
     'full_name': 'Full Name',
     'description': 'Github Description',
     'categories': 'Category',

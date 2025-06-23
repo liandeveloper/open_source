@@ -115,7 +115,7 @@ with tabs[0]:
                     st.subheader('Subscribers: ')
                     st.text(current_repo('subscribers_count'))
                     st.subheader('License:')
-                    st.text(current_repo('license'))
+                    st.text(current_repo('License'))
                     st.subheader('Last Updated:')
                     st.text(parse_date(current_repo('updated_at')))
             
@@ -147,8 +147,8 @@ with tabs[1]:
                      }).sort_values(sort_criteria, ascending=False,)
 
     license_stats = pd.merge(
-        pd.DataFrame(repo_data['license'].value_counts()),
-        pd.DataFrame(repo_data['license'].value_counts(normalize=True)),
+        pd.DataFrame(repo_data['License'].value_counts()),
+        pd.DataFrame(repo_data['License'].value_counts(normalize=True)),
         left_index=True, 
         right_index=True
     ).reset_index()
@@ -162,13 +162,13 @@ with tabs[1]:
         st.subheader("⚙️ Filtros")
         if chosen_filter == 'Absolute':
             min_repos = st.slider(
-                "Mínimo de repositorios:",
+                "Minimum repositories",
                 min_value=1,
                 max_value=int(language_count['Times Used'].max()),
                 value=15
             )
             max_repos = st.slider(
-                "Maximo de repositorios:",
+                "Maximum repositories",
                 min_value=min_repos,
                 max_value=int(language_count['Times Used'].max()),
                 value=int(language_count['Times Used'].max())
@@ -257,7 +257,6 @@ with tabs[1]:
             st.dataframe(
                 filtered_licenses.style.format({'Percent': '{:.2%}'}),
                 use_container_width=True,
-                height = 600
             )
         with col2:
             st.subheader('🌳 Tree Map Visualization')
@@ -280,6 +279,7 @@ with tabs[1]:
     st.subheader("🔧 Repo Stats According to License and Language")
 
     metrics_options = ['Forks', 'Pull Requests', 'Stars', 'Open Issues']    
+    parsed_options = [metric.lower().replace(' ', '_') for metric in metrics_options]
 
     metric_choice = st.multiselect(
         "Select Stats to compare",
@@ -287,40 +287,43 @@ with tabs[1]:
         default=metrics_options[:3],
     )
 
-    metric_choice = [metric.lower().replace(' ', '_') for metric in metric_choice]
+    parsed_choices = [metric.lower().replace(' ', '_') for metric in metric_choice]
 
     measurement = st.selectbox('How do you want to group the data',
                     options = ['Mean', 'Median', 'Total'])
     
     if metric_choice:
-        big_number = max(repo_data[metric].max() for metric in metric_choice)
+        big_number = max(repo_data[metric].max() for metric in parsed_options)
 
         col1, col2 = st.columns(2)
         with col1:
-            min_threshold = st.number_input(f"Minimum quantity of {', '.join(metric_choice)}", 1, big_number, 1, step=1000)
+            min_threshold = st.number_input(f"Minimum quantity of {', '.join(parsed_choices)}", 1, big_number, big_number//50, step=1000)
         with col2:
-            max_threshold = st.number_input(f"Maximum quantity of {', '.join(metric_choice)}", 1, big_number, big_number//2, step=1000)
+            max_threshold = st.number_input(f"Maximum quantity of {', '.join(parsed_choices)}", 1, big_number, big_number, step=1000)
         
-        condition = ((repo_data[metric_choice] >= min_threshold) & (repo_data[metric_choice] <= max_threshold)).all(axis=1)
-        metrics_df = repo_data[['Main Programming Language', 'license'] + metric_choice]
+        condition = ((repo_data[parsed_choices] >= min_threshold) & (repo_data[parsed_choices] <= max_threshold)).all(axis=1)
+        metrics_df = repo_data[['Main Programming Language', 'License'] + parsed_choices]
         metrics_df = metrics_df[condition]
         if measurement == 'Mean':
-            lang_metrics = metrics_df.groupby(['Main Programming Language'], as_index=False)[metric_choice].mean()
-            license_metrics = metrics_df.groupby(['license'], as_index=False)[metric_choice].mean()
+            lang_metrics = metrics_df.groupby(['Main Programming Language'], as_index=False)[parsed_choices].mean()
+            license_metrics = metrics_df.groupby(['License'], as_index=False)[parsed_choices].mean()
         elif measurement == 'Median':
-            ang_metrics = metrics_df.groupby(['Main Programming Language'], as_index=False)[metric_choice].median()
-            license_metrics = metrics_df.groupby(['license'], as_index=False)[metric_choice].median()
+            lang_metrics = metrics_df.groupby(['Main Programming Language'], as_index=False)[parsed_choices].median()
+            license_metrics = metrics_df.groupby(['License'], as_index=False)[parsed_choices].median()
         else:
             license_metrics = lang_metrics = metrics_df
 
+        top_bars = st.slider(
+            'Amount of languages/licenses to show:', 
+            4, 100, 10)
 
         col3, col4 = st.columns(2, border=True)
         with col3:
             st.subheader('By Main Language')
             fig = px.bar(
-                lang_metrics.sort_values(metric_choice[0], ascending=False),
+                lang_metrics.sort_values(parsed_choices[0], ascending=False).head(top_bars),
                 x='Main Programming Language',
-                y=metric_choice,
+                y=parsed_choices,
                 barmode='group',
                 color_discrete_sequence=px.colors.qualitative.Pastel,
                 labels={'value': 'Count', 'variable': 'Metric', 'Main Programming Language': 'Language'}
@@ -336,9 +339,9 @@ with tabs[1]:
         with col4:
             st.subheader('By License')
             fig = px.bar(
-                license_metrics.sort_values(metric_choice[0], ascending=False),
-                x='license',
-                y=metric_choice,
+                license_metrics.sort_values(parsed_choices[0], ascending=False).head(top_bars),
+                x='License',
+                y=parsed_choices,
                 barmode='group',
                 color_discrete_sequence=px.colors.qualitative.Pastel,
                 labels={'value': 'Count', 'variable': 'Metric', 'Main Programming Language': 'Language'}
@@ -352,9 +355,10 @@ with tabs[1]:
             st.plotly_chart(fig, use_container_width=True)
 
         with st.expander("📊 Ver datos agregados"):
-            agg_df = metrics_df.groupby('Main Programming Language')[metric_choice].sum().sort_values(metric_choice[0], ascending=False)
+            langs_agg = lang_metrics.groupby(['License','Main Programming Language'])[parsed_choices].sum().sort_values(parsed_choices[0], ascending=False)
+            
             st.dataframe(
-                agg_df.style.background_gradient(cmap='Blues'),
+                langs_agg.style.background_gradient(cmap='Blues'),
                 use_container_width=True
             )
     else:
@@ -376,7 +380,7 @@ with tabs[2]:
     #     options = ['License','Main Programming Language'])
     # qn1_p = 'open_issues' if quant_1 == 'Issues' else quant_1.replace(' ', '_').lower()
     # qn2_p = 'open_issues' if quant_2 == 'Issues' else quant_2.replace(' ', '_').lower()
-    # ql1_p = 'license' if quali_1 == 'License' else quali_1
+    # ql1_p = 'License' if quali_1 == 'License' else quali_1
 
     # st.plotly_chart(px.scatter(
     #     repo_data, 

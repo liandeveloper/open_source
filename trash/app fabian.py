@@ -65,8 +65,8 @@ st.header("📜 Distribución de Licencias de Software")
 
 # 1. Procesamiento de datos
 license_stats = pd.merge(
-    pd.DataFrame(repos_df['license'].value_counts()),
-    pd.DataFrame(repos_df['license'].value_counts(normalize=True)),
+    pd.DataFrame(repos_df['License'].value_counts()),
+    pd.DataFrame(repos_df['License'].value_counts(normalize=True)),
     left_index=True, 
     right_index=True
 ).reset_index()
@@ -153,7 +153,7 @@ clean_df = repos_df.copy()
 clean_df['language'] = clean_df['language'].apply(
     lambda x: 'Other' if x not in biggest_languages['Lenguaje'].values else x
 )
-clean_df['license'] = clean_df['license'].apply(
+clean_df['License'] = clean_df['License'].apply(
     lambda x: 'Other' if x not in biggest_licenses['Licencia'].values else x
 )
 
@@ -174,7 +174,7 @@ if metric_choice:
         barmode='group',
         color_discrete_sequence=px.colors.qualitative.Pastel,
         labels={'value': 'Count', 'variable': 'Metric', 'language': 'Language'},
-        hover_data=['license']
+        hover_data=['License']
     )
     fig.update_layout(
         xaxis_title="Lenguaje de Programación",
