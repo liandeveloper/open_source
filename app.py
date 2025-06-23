@@ -15,6 +15,7 @@ st.title("🚀 Repo Radar")
 st.text("""
 This website provides a thorough analysis of the most popular open-source Github repositories.
 Skip the search and start buliding with Repo Radar!!!
+Our data was last updated on May 2025.
 """)
 ss = st.session_state
 repo_data = pd.read_csv('repo_data_clean.csv', sep=';')
