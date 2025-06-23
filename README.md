@@ -1,102 +1,98 @@
-# Open Source Analysis
+# Open Source Analysis  
 
-## Introducción
+## Introduction  
 
-El software de código abierto (open source) ha transformado la forma en que se desarrolla y distribuye la tecnología. Desde sistemas operativos como Linux hasta herramientas de desarrollo como Visual Studio Code, el código abierto ha demostrado ser un motor de innovación y colaboración global. Este proyecto busca analizar el ecosistema del software de código abierto, explorando su evolución, tendencias y el perfil de los desarrolladores que lo impulsan.
+Open-source software has transformed the way technology is developed and distributed. From operating systems like Linux to development tools like Visual Studio Code, open source has proven to be a driver of innovation and global collaboration. This project aims to analyze the open-source software ecosystem, exploring its evolution, trends, and the profile of the developers who drive it.  
 
-# Metodología
+# Methodology  
 
-1. **Recopilación de datos**  
-   - Uso de APIs (e.g., GitHub API) para extraer datos de repositorios.  
-   - Limpieza y preprocesamiento de datos con Python (Pandas, NumPy).  
-2. **Análisis exploratorio de datos (EDA)**  
-   - Visualización de tendencias.  
-   - Identificación de patrones y correlaciones.  
-3. **Herramientas**:  
+1. **Data Collection**  
+   - Use of APIs (e.g., GitHub API) to extract repository data.  
+   - Data cleaning and preprocessing with Python (Pandas, NumPy).  
+2. **Exploratory Data Analysis (EDA)**  
+   - Trend visualization.  
+   - Identification of patterns and correlations.  
+3. **Tools**:  
    - Python (Pandas, NumPy).  
-   - Jupyter Notebooks para el análisis interactivo.
-   - Streamlit
+   - Jupyter Notebooks for interactive analysis.  
+   - Streamlit.  
 
-# Objetivos del proyecto
+# Project Objectives  
 
-1. Analizar las tendencias de uso y adopción del software de código abierto.  
-2. Identificar los proyectos de código abierto más populares y sus características.
+1. Analyze trends in the use and adoption of open-source software.  
+2. Identify the most popular open-source projects and their characteristics.  
 
-### Heavy Hitters
+### Heavy Hitters  
 
-5. ¿Cuáles son las características de los programas más exitosos?¿Cómo se destacan con respecto al resto y entre ellos?  
-   - ¿Cuántas estrellas tienen?  
-   - ¿Cuántos forks tienen?  
-   - ¿Qué lenguajes utilizan?  
-   - ¿A qué licencias se ascriben?  
-   - ¿Son gratis o de pago?
+5. What are the characteristics of the most successful programs? How do they stand out from the rest and among themselves?  
+   - How many stars do they have?  
+   - How many forks do they have?  
+   - What languages do they use?  
+   - What licenses do they adhere to?  
+   - Are they free or paid?  
 
-### Desarrolladores
+### Developers  
 
-6. ¿Quiénes son los commiters/desarrolladores más importantes y cómo se destacan con respecto al resto?  
-7. ¿Cuál es el perfil de un commiter activo/exitoso?  
-   - ¿Cuántos seguidores, repositorios, forks y commits tienen?  
-   - ¿Qué tipo de software desarrollan?  
-   - ¿En qué lenguaje programan?  
-   - ¿Trabajan en conjunto o en solitario?  
-   - ¿Están afiliados a alguna organización (centros educativos, empresas, gobiernos, etc.)?  
-   - ¿Cuáles son sus fuentes de ingresos?  
-   - ¿Obtienen ganancias de su trabajo cómo desarrolladores de codigo abierto? De ser así,¿a través de que medio lo hacen?
+6. Who are the most important committers/developers, and how do they stand out from the rest?  
+7. What is the profile of an active/successful committer?  
+   - How many followers, repositories, forks, and commits do they have?  
+   - What kind of software do they develop?  
+   - What language do they program in?  
+   - Do they work collaboratively or independently?  
+   - Are they affiliated with any organizations (educational institutions, companies, governments, etc.)?  
+   - What are their income sources?  
+   - Do they earn revenue from their work as open-source developers? If so, through what means?  
 
-## Público Objetivo
+## Target Audience  
 
-Está dirigido a desarrolladores, científicos de datos, investigadores y empresas interesadas en las ventajas del código abierto, como transparencia, innovación y reducción de costos. También atrae a comunidades educativas y estudiantes que buscan explorar su impacto y aplicaciones prácticas en la industria tecnológica.
+This is aimed at developers, data scientists, researchers, and companies interested in the advantages of open source, such as transparency, innovation, and cost reduction. It also appeals to educational communities and students seeking to explore its impact and practical applications in the tech industry.  
 
-#### El proyecto está enfocado a:
+#### The project focuses on:  
 
-- **Desarrolladores de software independientes**: Para entender las tendencias del mercado y las oportunidades en el ecosistema de código abierto.  
-- **Empresas de tecnología**: Para identificar proyectos y talentos clave en el ámbito del código abierto.  
-- **Gobiernos y organizaciones públicas**: Para evaluar el impacto y la adopción del software de código abierto en el sector público.
+- **Independent software developers**: To understand market trends and opportunities in the open-source ecosystem.  
+- **Tech companies**: To identify key projects and talent in the open-source space.  
+- **Governments and public organizations**: To evaluate the impact and adoption of open-source software in the public sector.  
 
-# Fuentes de datos
+# Data Sources  
 
-#### **Repositorios de código abierto**
+#### **Open-Source Repositories**  
 
-- GitHub API
+- GitHub API  
 
-# Campaña de promoción
+# Promotion Campaign  
 
-- **Objetivo**:  
-    
-  - Dar a conocer los resultados del proyecto y su relevancia para estudiantes, profesores y profesionales interesados en tecnología y ciencia de datos.
+- **Objective**:  
+  - Raise awareness of the project's findings and their relevance to students, educators, and professionals interested in technology and data science.  
 
+- **Social Media**:  
+  - Publish visual summaries (infographics, short videos) highlighting the benefits of open source.  
+  - Instagram: [@ds.open.source](https://www.instagram.com/ds.open.source/)  
 
-- **Redes Sociales**:  
-    
-  - Publicar resúmenes visuales (infografías, videos cortos), destacando los beneficios del código abierto.
-  - Instagram: [@ds.open.source](https://www.instagram.com/ds.open.source/)
+- **Free Resources**:  
+  - Offer an executive summary or downloadable guide with key conclusions.  
+  - Share code examples or datasets used in the project.  
 
-- **Recursos Gratuitos**:  
-    
-  - Ofrecer un resumen ejecutivo o guía descargable con las conclusiones principales.  
-  - Compartir ejemplos de código o datasets usados en el proyecto.
+## History  
 
-## Historia
+Open-source software has evolved from a fringe movement to a dominant force in the tech industry. From the creation of Linux in 1991 to the rise of projects like Kubernetes and TensorFlow, open source has demonstrated its ability to drive innovation and global collaboration. This history will be the central theme of our promotional campaign.  
 
-El software de código abierto ha pasado de ser un movimiento marginal a una fuerza dominante en la industria tecnológica. Desde la creación de Linux en 1991 hasta el auge de proyectos como Kubernetes y TensorFlow, el código abierto ha demostrado su capacidad para impulsar la innovación y la colaboración global. Esta historia será el eje central de nuestra campaña de promoción.
+## Video
 
-## Video/Podcast
+A series of short documentaries exploring the history of open source, interviews with key developers, and an analysis of current trends, such as the economic impact of open source, success stories of notable projects, and the profile of the most influential developers.  
 
-Una serie de documentales cortos que exploren la historia del código abierto, entrevistas con desarrolladores clave y un análisis de las tendencias actuales, como el impacto económico del código abierto, las historias de éxito de proyectos destacados y el perfil de los desarrolladores más influyentes.
+# Data Product  
 
-# DataProduct
+### Dashboard (Streamlit)  
 
-### Dashboard (Streamlit)
+An [interactive platform](https://huggingface.co/spaces/liandev/open-source) displaying the most popular open-source projects, filtered by categories such as:  
 
-Una plataforma [interactiva](https://l.instagram.com/?u=https%3A%2F%2Fhuggingface.co%2Fspaces%2Fliandev%2Fopen-source%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAacGvxNqvVs2sjQKYKam0ylgQCsc7B3G8zydFkqrM0h5LsJSFF1l_5sBF1sqog_aem_zrFe92nBai9a3nz4hneprw&e=AT0jZNI7RSiC3nAIHkRAG6dRkyEX9R__NDe9WCb6wKT978XDvTA2A_vBk-obVpqWyg8uEI3TCrNpXW9s15gHlk14GxfIzI5Vf0vzTQ4) que muestre los proyectos de código abierto más populares, filtrados por categorías como:
+- Programming Language  
+- Licenses  
+- Software Type  
 
-- Lenguaje de Código  
-- Licencias  
-- Tipo de Software  
+#### **Features**:  
 
-#### **Funcionalidades**:
-
-- Búsqueda avanzada de proyectos.  
-- Visualización de tendencias y estadísticas.  
-- Perfiles detallados de desarrolladores y proyectos.  
-- Sección de noticias y actualizaciones sobre el ecosistema de código abierto.
+- Advanced project search.  
+- Trend and statistics visualization.  
+- Detailed profiles of developers and projects.  
+- News and updates section on the open-source ecosystem.
