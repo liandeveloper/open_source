@@ -16,7 +16,6 @@ st.text("""
 This website provides a thorough analysis of the most popular open-source Github repositories.
 Skip the search and start buliding with Repo Radar!!!
 """)
-
 ss = st.session_state
 repo_data = pd.read_csv('repo_data_clean.csv', sep=';')
 
@@ -30,7 +29,7 @@ all_prog_langs = extract_unique(repo_data['Programming Languages used'].map(pars
 count_langs = lambda column: {key: len(repo_data[repo_data[column].str.contains(key, na = False)]) \
                     for key in all_prog_langs}
 
-tabs = st.tabs(['Find your repo', 'Data Analysis', "What's next?"])
+tabs = st.tabs(['🔎 Find your repo', '📈 Data Analysis', "🚨 What's next?"])
 
 with tabs[0]:
     st.header('What repo are you looking for?')
@@ -121,12 +120,14 @@ with tabs[0]:
             
             st.subheader(f"URL link: {current_repo('url')}") 
         else:
-            st.warning("Select a Repo to view it's data")
+            st.subheader("Select a Repo to view it's data")
             st.text('You can select a repo by clicking on the checkbox in the first column of the DataFrame')
 
 with tabs[1]:
     st.header("💻 GitHub Analytics Dashboard")
+    st.text('Open the sidebar to use our filters')
     st.subheader("📚 Programming Languages Distribution")
+    
 
     # Setting up the dataframes:
 
@@ -195,23 +196,28 @@ with tabs[1]:
 
     with col2:
         st.subheader("Top Languages")
+        top_lang =  st.slider('Amount of languages shown:', 5, 20,12)
         fig = px.bar(
-            filtered_lang_count.head(12),
+            filtered_lang_count.head(top_lang),
             x='Language',
             y=['Times Used', 'As Main'],
             barmode = 'overlay',
             color='Language',
-            text= 'Used %',
-            labels={'Conteo': 'N° de Repositorios', 'Porcentaje': '%'},
+            text_auto=True,
             hover_name='Language',
             hover_data={
-                'Used %': ':.2%', 'As Main %': ':.2%'}
+                'Used %': ':.2%', 'As Main %': ':.2%',
+                }
         )
         fig.update_traces(
-            texttemplate='%{text:.2%}', 
+            # texttemplate='%{text:.2%}', 
             textposition='outside',
             showlegend = False
             )
+        fig.update_layout(
+            xaxis_title="Programming Language",
+            yaxis_title="Count",
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     with st.expander("🀄 See More", expanded=False):
@@ -271,6 +277,7 @@ with tabs[1]:
                 names='License',
                 values='Count',
                 path = ['License'],
+                hover_name='License',
                 hover_data={'Percent': ':.2%'},
             )
             fig_tree.update_layout(
@@ -368,7 +375,7 @@ with tabs[1]:
                 use_container_width=True
             )
     else:
-        st.warning("Por favor selecciona al menos una métrica para visualizar")
+        st.warning("Please select at least one metric to visualize")
 
 with tabs[2]:
     st.header('We are still not done!!!')
