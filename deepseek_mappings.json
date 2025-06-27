@@ -11,7 +11,7 @@
     "Bourne": ["sh"],
     "Babel": ["babel"],
     "WebAssembly": ["webassembly", "wasm", "WebAssembly", "wasm"],
-    "ZSH": ["zsh"],
+    "ZSH": ["zrepos_df.loc[len(repos_df)]= get_repo_data(repo)sh"],
     "SQL": ["sql", "SQL"],
     "Redis": ["redis"],
     "Lisp": ["lisp"],
